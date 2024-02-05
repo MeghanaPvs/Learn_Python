@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask,request,jsonify
 app = Flask(__name__) #created an instance to this server
 
 #defining routes:
@@ -14,9 +14,8 @@ posts = [
     {'id': 1, 'title': 'Post 1', 'content': 'This is the content of post 1'},
     {'id': 2, 'title': 'Post 2', 'content': 'This is the content of post 2'}
 ]
-#Create operation
+# Create operation
 @app.route('/post/create', methods=['POST'])
-
 def create_post():
     new_post = {'id': len(posts) + 1, 'title': 'New Post', 'content': 'This is a new post'}
     posts.append(new_post)
@@ -26,5 +25,18 @@ def create_post():
 @app.route('/posts')
 def get_posts():
     return {'posts': posts}
+
+
+# Update operation
+@app.route('/post/update/<int:post_id>',methods=['PUT'])
+def update_post(post_id):
+    for post in posts:
+        if post['id'] == post_id:
+            post['title'] = request.json.get('title', post['title'])
+            post['content'] = request.json.get('content', post['content'])
+            print('JSON',request.json)
+            return jsonify({'message': 'Post updated successfully', 'post': post})
+    return jsonify({'message': 'Post not found'})
+
 if __name__ == '__main__':
     app.run(debug=True,port=3000)
